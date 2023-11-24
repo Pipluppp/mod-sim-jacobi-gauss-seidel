@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 #define MATRIX_SIZE 3
-#define ERROR_SET 0.01
+#define ERROR_SET 0.0001
+#define DIVERGE_SET 1000000
 
 int main() {
     // Matrix of coefficients of the system
@@ -12,15 +13,20 @@ int main() {
     
     // Resulting vector
     int resulting_vec[3] = {1, 2, 3};
+
+    // Aesthetics
+    printf("JACOBI METHOD\n");
+    printf("Solving the following System of Linear Equations in three (3) variables\n");
+    printf("3x + y + z = 1 \n 2x + 6y + 3z = 2 \n 2x + y + 4z = 3\n");
     
     /* An extra copy to have access to the current and also the previous iteration's approximated variables
     For each iteration, tmp_approx holds the new calculated variables, but then we copy it to approx by the end */
     float approx[3] = {0, 0, 0};
     float tmp_approx[3] = {0, 0, 0}; 
     
-    // Error variables
-    float error = 1;
-    float err[3] = {0};
+    float error = 1; 
+    float err[3] = {0}; // Errors for X, Y, Z
+    float product_errors = 1; // To check divergence of error
     
     int iter = 0; 
     
@@ -60,10 +66,19 @@ int main() {
         
         // Calculate errors
         error = 0;
+
         for (int i = 0; i < MATRIX_SIZE; i++)
         {
             err[i] = fabs((tmp_approx[i] - approx[i]) / tmp_approx[i]);
             error += err[i] / MATRIX_SIZE;
+        }
+
+        // Diverging errors check
+        product_errors *= error;
+        if (product_errors > DIVERGE_SET)
+        {
+            printf("Diverging");
+            break;
         }
     
         // Update the current approximations
@@ -73,10 +88,11 @@ int main() {
         // Print iteration's values
         printf("\nITERATION %d:\n", iter);
         for (int i = 0; i < 3; i++)
-            printf("Approximation X_%d: %f\n", i + 1, approx[i]);
+            printf("%c: %f\n", 88 + i, approx[i]);
+
         printf("Error: %f\n", error);
         
-        // Reset tmp_approx
+        // Reset tmp_approx 
         for (int i = 0; i < MATRIX_SIZE; i++)
             tmp_approx[i] = 0;
     
