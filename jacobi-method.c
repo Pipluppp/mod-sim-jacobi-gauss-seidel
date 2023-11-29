@@ -14,16 +14,15 @@ int main() {
     // Resulting vector
     int resulting_vec[3] = {1, 2, 3};
 
-    // Aesthetics
     printf("JACOBI METHOD\n");
     printf("Solving the following System of Linear Equations in three (3) variables\n");
     printf("3x + y + z = 1 \n 2x + 6y + 3z = 2 \n 2x + y + 4z = 3\n");
     
-    /* An extra copy to have access to the current and also the previous iteration's approximated variables
-    For each iteration, tmp_approx holds the new calculated variables, but then we copy it to approx by the end */
-    float approx[3] = {0, 0, 0};
-    float tmp_approx[3] = {0, 0, 0}; 
+    // For the previous and current iteration's approximations
+    float previous_approximation[3] = {0, 0, 0};
+    float current_approximation[3] = {0, 0, 0}; 
     
+    // Errors
     float error = 1; 
     float err[3] = {0}; // Errors for X, Y, Z
     float product_errors = 1; // To check divergence of error
@@ -46,30 +45,26 @@ int main() {
         }
     }
 
-    // TODO: Check if possible to be rearranged into Diagonally Dominant
-    // TODO: Rearrange to Diagonally Dominant
-
     // Jacobi Method Algorithm
     while (error >= ERROR_SET)
     {   
         for (int i = 0; i < MATRIX_SIZE; i++)
         {            
+            current_approximation[i] += resulting_vec[i]; // Add resulting vector coefficient
+
             // Subtract dot product of row with approx (i != j)
             for (int j = 0; j < MATRIX_SIZE; j++)
                 if (i != j)
-                    tmp_approx[i] -= matrix[i][j] * approx[j];
+                    current_approximation[i] -= matrix[i][j] * previous_approximation[j];
 
-            tmp_approx[i] += resulting_vec[i]; // Add resulting vector coefficient
-
-            tmp_approx[i] /= matrix[i][i]; // Divide whole expression by coefficient of var being solved
+            current_approximation[i] /= matrix[i][i]; // Divide whole expression by coefficient of variable being solved
         } 
         
         // Calculate errors
         error = 0;
-
         for (int i = 0; i < MATRIX_SIZE; i++)
         {
-            err[i] = fabs((tmp_approx[i] - approx[i]) / tmp_approx[i]);
+            err[i] = fabs((current_approximation[i] - previous_approximation[i]) / current_approximation[i]);
             error += err[i] / MATRIX_SIZE;
         }
 
@@ -80,21 +75,20 @@ int main() {
             printf("Diverging");
             break;
         }
-    
-        // Update the current approximations
-        for (int i = 0; i < MATRIX_SIZE; i++)
-            approx[i] = tmp_approx[i];
-        
+
         // Print iteration's values
         printf("\nITERATION %d:\n", iter);
         for (int i = 0; i < 3; i++)
-            printf("%c: %f\n", 88 + i, approx[i]);
-
+            printf("%c: %f\n", 88 + i, current_approximation[i]);
         printf("Error: %f\n", error);
-        
-        // Reset tmp_approx 
+
+        // Update the approximations
         for (int i = 0; i < MATRIX_SIZE; i++)
-            tmp_approx[i] = 0;
+            previous_approximation[i] = current_approximation[i];
+        
+        // Reset current_approximation 
+        for (int i = 0; i < MATRIX_SIZE; i++)
+            current_approximation[i] = 0;
     
         iter++;
     }
